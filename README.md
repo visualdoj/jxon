@@ -1,3 +1,5 @@
+[![JXON CI](https://github.com/visualdoj/jxon/actions/workflows/jxon-ci.yml/badge.svg)](https://github.com/visualdoj/jxon/actions/workflows/jxon-ci.yml)
+
 # JXON
 
 `JXON` is a binary format for structured data.
