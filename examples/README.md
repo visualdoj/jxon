@@ -1,6 +1,6 @@
 # JXON Examples
 
-This directory conains examples of JXON values.
+This directory contains examples of JXON values.
 `*.jxon` files are JXON values,
 `*.txt` are their annotated hex dumps and
 `*.json` are their respective JSON equivalents.

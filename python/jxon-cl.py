@@ -46,7 +46,7 @@ def start_readme():
     README = open(os.path.join(examples_prefix, 'README.md'), 'w', encoding='utf-8')
     README.write('# JXON Examples\n')
     README.write('\n')
-    README.write('This directory conains examples of JXON values.\n')
+    README.write('This directory contains examples of JXON values.\n')
     README.write('`*.jxon` files are JXON values,\n')
     README.write('`*.txt` are their annotated hex dumps and\n')
     README.write('`*.json` are their respective JSON equivalents.\n')
