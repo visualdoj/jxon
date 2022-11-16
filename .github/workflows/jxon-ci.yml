@@ -3,7 +3,7 @@ name: JXON CI
 on: [push, pull_request]
 
 jobs:
-  Test Python:
+  Test-Python:
     strategy:
       fail-fast: false
       matrix:
