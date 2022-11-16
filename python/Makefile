@@ -1,9 +1,10 @@
 default : test;
 
-PROTOC:=protoc
-PYTHON:=py
+PROTOC?=protoc
+PYTHON?=python
+PYTEST?=pytest
+
 PROTOBUF_PYTHON_SOURCES:=movies_pb2.py
-PYTEST:=pytest
 
 test :
 	$(PYTEST)
