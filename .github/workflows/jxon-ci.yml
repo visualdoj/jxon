@@ -1,0 +1,28 @@
+name: JXON CI
+
+on: [push, pull_request]
+
+jobs:
+  Test Python:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
+        python_version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+            path: repository
+
+      - uses: actions/setup-python@v4
+        with:
+            python-version: ${{ matrix.python_version }}
+
+      - run: pip install -U protobuf
+
+      - run: pip install -U pytest
+
+      - run: make test
+        working-directory: ${{ github.workspace }}/repository/python
