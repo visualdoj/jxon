@@ -3,9 +3,10 @@ default : test;
 PROTOC:=protoc
 PYTHON:=py
 PROTOBUF_PYTHON_SOURCES:=movies_pb2.py
+PYTEST:=pytest
 
 test :
-	$(PYTHON) jxon-cl.py
+	$(PYTEST)
 
 $(PROTOBUF_PYTHON_SOURCES) : ../protobuf/movies.proto
 	$(PROTOC) -I../protobuf --python_out=. movies.proto
