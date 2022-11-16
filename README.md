@@ -13,9 +13,8 @@ Draft. Format for `BigInt` is yet to be [chosen](docs/bigint_ideas.md).
 
 ## Examples
 
-See [examples](examples) directory. `*.jxon` files are JXON values,
-`*.txt` are their annotated hex dumps and `*.json` are their respective
-JSON equivalents.
+See [examples](examples#jxon-examples) directory. `*.jxon` files are JXON values,
+`*.txt` are their hex dumps and `*.json` are their respective JSON equivalents.
 
 ## Specification
 
