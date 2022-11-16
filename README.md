@@ -11,6 +11,12 @@
 
 Draft. Format for `BigInt` is yet to be [chosen](docs/bigint_ideas.md).
 
+## Examples
+
+See [examples](examples) directory. `*.jxon` files are JXON values,
+`*.txt` are their annotated hex dumps and `*.json` are their respective
+JSON equivalents.
+
 ## Specification
 
 `JXON` value is a sequence of commands. Each command starts with 1 byte header
@@ -75,11 +81,11 @@ b10xx1110   14      BigInt              Signed BigInt
 b10xx1111   15                          -1
 ```
 
-#### BigInt
+### BigInt
 
 [TBA](docs/bigint_ideas.md)
 
-#### The table
+### The table
 
 Parser should keep up to 128 string values in a special array of strings called
 *table* while parsing. Each value in the table has an index in range 0..127. At
@@ -98,7 +104,7 @@ Values in the table may be overwritten by following "put" commands.
 
 The table is used only for keys. It cannot be used for values.
 
-#### Structures: arrays and objects
+### Structures: arrays and objects
 
 An array starts with `F4` and ends with `F5`. Between the two must be a
 sequence of JXON values.

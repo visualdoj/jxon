@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+message Movie {
+    required string id = 1;
+    required string title = 2;
+    required int32 year = 3;
+    required string director = 4;
+    repeated string genres = 5;
+}
+
+message MoviesDataset {
+    repeated Movie movies = 1;
+}
