@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
-        python_version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python_version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.x']
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -39,6 +39,8 @@ jobs:
             path: repository
 
       - uses: actions/setup-python@v4
+        with:
+            python-version: '3.x'
 
       - run: pip install -U protobuf
 
