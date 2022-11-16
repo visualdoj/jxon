@@ -8,6 +8,7 @@
 #   License: Public domain or MIT
 #
 
+import io
 import json
 import math
 import numbers
@@ -86,7 +87,7 @@ def decode(data, allowJSON=True):
             elif head == 0xF7: return struct.unpack('<f', stream.read(4))
             elif head == 0xF8: return struct.unpack('<d', stream.read(8))
             elif head == 0xF9: return fractions.Fraction(decode_bigint(), decode_bigint())
-            elif 0x80 <= head <= 0xBF:
+            elif 0x80 <= head[0] <= 0xBF:
                 i = decode_int(head)
                 if head & 0xF0 == 0x80:
                     return i
@@ -108,10 +109,13 @@ def decode(data, allowJSON=True):
     if guess_jxon(data):
         return decode_value_from_stream()
     else:
-        try:
-            return json.loads(data)
-        except:
-            raise ValueError('data must be in JXON or JSON format')
+        if allowJSON:
+            try:
+                return json.loads(data)
+            except:
+                raise ValueError('data must be in JXON or JSON format')
+        else:
+            raise ValueError('invalid head value')
 
 
 def encode(value,
@@ -175,7 +179,6 @@ def encode(value,
 
         msb, lsb = msb_lsb(numerator)
         resolution = msb - lsb + 1
-        print('rational n=', numerator, ' d=', denominator, ' e=', e, ' msb=', msb, ' lsb=', lsb, ' resolution=', resolution)
 
         # r = numerator * 2**(-e)
 
@@ -196,8 +199,6 @@ def encode(value,
             return struct.pack("<Bd", 0xF8, r)
 
         return encode_bigfloat(numerator, denominator)
-
-        
 
     def encode_float(f):
         if f == 0.0:
