@@ -203,7 +203,7 @@ def encode(value,
             return b'\xF6'
 
         # special IEEE values
-        if f != f:
+        if math.isinf(f) or math.isnan(f):
             return struct.pack("<Bf", 0xF7, f)
 
         numerator, denominator = f.as_integer_ratio()
