@@ -1,7 +1,9 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
+
+"""Module for encoding and decoding JXON values.
+"""
 
 #
-#   Module for encoding and decoding JXON values.
 #   Originally published to https://github.com/visualdoj/jxon
 #
 #   Author:  Doj
@@ -16,8 +18,8 @@ import struct
 import fractions
 
 
-def decode(data, allowJSON=True):
-    """Decodes JXON and returns it as a python value
+def decode(data, allow_JSON=True):
+    """Decodes JXON and returns it as a python value.
     """
 
     table=[]
@@ -25,7 +27,7 @@ def decode(data, allowJSON=True):
 
     def guess_jxon(data):
         first = data[0]
-        return (first >= 0x80) and (first < 0xFE) and (first != 0xEF)
+        return (0x80 <= first < 0xFE) and (first != 0xEF)
 
     def decode_bigint():
         raise NotImplementedError('BigInt Decoder')
@@ -34,18 +36,15 @@ def decode(data, allowJSON=True):
         low = head & 0x0F
         if low == 10:
             return struct.unpack('<b', stream.read(1))
-        elif low == 11:
+        if low == 11:
             return struct.unpack('<h', stream.read(2))
-        elif low == 12:
+        if low == 12:
             return struct.unpack('<i', stream.read(4))
-        elif low == 13:
+        if low == 13:
             return struct.unpack('<q', stream.read(8))
-        elif low == 14:
+        if low == 14:
             return decode_bigint()
-        elif low == 15:
-            return -1
-        else:
-            return low
+        return low if low != 15 else -1
 
     def decode_key_from_stream(head):
         if (head & 0xF0) != 0xB0:
@@ -56,77 +55,79 @@ def decode(data, allowJSON=True):
         return s
 
     def decode_object_from_stream():
-        d = dict()
+        obj = {}
         while True:
             head = stream.read(1)
             if head == 0xF5:
-                return d
+                return obj
             if head < 0x80:
                 key = table[head]
             else:
                 key = decode_key_from_stream(head)
             value = decode_value_from_stream()
-            d[key] = value
+            obj[key] = value
 
     def decode_array_from_stream():
         raise NotImplementedError('TODO array decoder')
 
-    def decode_array_from_stream():
-        raise NotImplementedError('TODO object decoder')
-
     def decode_value_from_stream():
         while True:
             head = stream.read(1)
-            if   head == 0xF0: return None
-            elif head == 0xF1: return False
-            elif head == 0xF2: return True
-            elif head == 0xF3: return decode_object_from_stream()
-            elif head == 0xF4: return decode_array_from_stream()
-            elif head == 0xF5: return ValueError('unexpected end of a structure')
-            elif head == 0xF6: return 0.0
-            elif head == 0xF7: return struct.unpack('<f', stream.read(4))
-            elif head == 0xF8: return struct.unpack('<d', stream.read(8))
-            elif head == 0xF9: return fractions.Fraction(decode_bigint(), decode_bigint())
-            elif 0x80 <= head[0] <= 0xBF:
+            if head == 0xF0:
+                return None
+            if head == 0xF1:
+                return False
+            if head == 0xF2:
+                return True
+            if head == 0xF3:
+                return decode_object_from_stream()
+            if head == 0xF4:
+                return decode_array_from_stream()
+            if head == 0xF5:
+                return ValueError('unexpected end of a structure')
+            if head == 0xF6:
+                return 0.0
+            if head == 0xF7:
+                return struct.unpack('<f', stream.read(4))
+            if head == 0xF8:
+                return struct.unpack('<d', stream.read(8))
+            if head == 0xF9:
+                return fractions.Fraction(decode_bigint(), decode_bigint())
+            if 0x80 <= head[0] <= 0xBF:
                 i = decode_int(head)
                 if head & 0xF0 == 0x80:
                     return i
-                elif head & 0xF0 == 0x90:
+                if head & 0xF0 == 0x90:
                     return stream.read(i)
-                elif head & 0xF0 == 0xA0:
+                if head & 0xF0 == 0xA0:
                     s = stream.read(i).decode('utf-8')
                     stream.read(1) # skip null character
                     return s
-                elif head & 0xF0 == 0xB0:
+                if head & 0xF0 == 0xB0:
                     s = stream.read(i).decode('utf-8')
                     stream.read(1) # skip null character
                     index = struct.unpack('<B', stream.read(1))
                     table[index] = s
                     continue
-            else:
-                raise ValueError('Invalid JXON')
+            raise ValueError('Unknown head in JXON ' + hex(head))
 
-    if guess_jxon(data):
-        return decode_value_from_stream()
-    else:
-        if allowJSON:
-            try:
-                return json.loads(data)
-            except:
-                raise ValueError('data must be in JXON or JSON format')
-        else:
-            raise ValueError('invalid head value')
+    if allow_JSON and not guess_jxon(data):
+        try:
+            return json.loads(data)
+        except Exception as exception:
+            raise ValueError('data must be in JXON or JSON format') from exception
+
+    return decode_value_from_stream()
 
 
 def encode(value,
            keys_table=None,
           ):
-    """Encodes the specified value as JXON and returns it as bytes
-    """
+    """Encodes the specified value as JXON and returns it as bytes"""
 
-    keys = dict()
+    keys = {}
 
-    def encode_null(n):
+    def encode_null():
         return b'\xF0'
 
     def encode_bigint(i):
@@ -150,18 +151,15 @@ def encode(value,
             return struct.pack("<Bq", head | 0x0D, i)
         return bytes(head | 0x0E) + encode_bigint(i)
 
-    def encode_bool(b):
-        if b:
-            return b'\xF2'
-        else:
-            return b'\xF1'
+    def encode_bool(value):
+        return b'\xF2' if value else b'\xF1'
 
     def msb_lsb(i):
-        b = bin(abs(i))
-        msb = len(b)-2 - 1 # ignore '0b' prefix
+        binary_string = bin(abs(i))
+        msb = len(binary_string) - 2 - 1    # ignore '0b' prefix
         lsb = 0
-        for c in reversed(b):
-            if c == '1':
+        for character in reversed(binary_string):
+            if character == '1':
                 break
             lsb += 1
         return msb, lsb
@@ -176,27 +174,35 @@ def encode(value,
         if denominator & (denominator - 1) != 0:
             return encode_bigfloat(numerator, denominator)
 
-        e = math.frexp(denominator)[1] - 1
+        exponent = math.frexp(denominator)[1] - 1
 
-        # e == log2(denominator)
-        # r == numerator * 2**(-e)
+        # exponent == log2(denominator)
+        # r == numerator * 2**(-exponent)
 
         msb, lsb = msb_lsb(numerator)
         resolution = msb - lsb + 1
 
-        # r == numerator * 2**(-23-lsb) * 2**(-e+23+lsb)
-        # r == numerator * 2**(-msb)    * 2**(-e+msb)
+        # r == numerator * 2**(-23-lsb) * 2**(-exponent+23+lsb)
+        # r == numerator * 2**(-msb)    * 2**(-exponent+msb)
         if (
-            ((resolution <= 23) and (-e+23+lsb == -126)) # denormalized 32-bit float
-        or  ((resolution <= 24) and (1-127 <= -e+msb <= 254-127)) # normalized 32-bit float
+
+            # denormalized 32-bit float
+            ((resolution <= 23) and (-exponent+23+lsb == -126))
+
+            # normalized 32-bit float
+        or  ((resolution <= 24) and (1-127 <= -exponent+msb <= 254-127))
+
         ):
             return struct.pack("<Bf", 0xF7, r)
 
-        # r == numerator * 2**(-52-lsb) * 2**(-e+52+lsb)
-        # r == numerator * 2**(-msb)    * 2**(-e+msb)
         if (
-            ((resolution <= 52) and (-e+52+lsb == -1022)) # denormalized 64-bit float
-        or  ((resolution <= 53) and (1-1023 <= -e+msb <= 2046-1023)) # normalized 64-bit float
+            # denormalized 64-bit float
+            # r == numerator * 2**(-52-lsb) * 2**(-exponent+52+lsb)
+            ((resolution <= 52) and (-exponent+52+lsb == -1022))
+
+            # normalized 64-bit float
+            # r == numerator * 2**(-msb)    * 2**(-exponent+msb)
+        or  ((resolution <= 53) and (1-1023 <= -exponent+msb <= 2046-1023))
         ):
             return struct.pack("<Bd", 0xF8, r)
 
@@ -216,14 +222,14 @@ def encode(value,
     def encode_str(head, s):
         return encode_int_or_len(head, len(s.encode('utf-8'))) + s.encode('utf-8') + b'\x00'
 
-    def encode_blob(head, b):
-        return encode_int_or_len(head, len(b)) + b
+    def encode_blob(blob):
+        return encode_int_or_len(0x90, len(blob)) + blob
 
     def encode_dict(document):
         blob = bytearray(b'\xF3') # "start object" marker
 
         for key, value in document.items():
-            if type(key) is not str:
+            if not isinstance(key, str):
                 raise TypeError("keys must be strings")
             if key in keys:
                 blob = blob + struct.pack("<B", keys[key])
@@ -253,27 +259,26 @@ def encode(value,
 
     def encode_value(value):
         if value is None:
-            return encode_null(value)
-        elif value is True:
+            return encode_null()
+        if value is True:
             return encode_bool(value)
-        elif value is False:
+        if value is False:
             return encode_bool(value)
-        elif isinstance(value, int):
+        if isinstance(value, int):
             return encode_int_or_len(0x80, value)
-        elif isinstance(value, numbers.Rational):
+        if isinstance(value, numbers.Rational):
             return encode_rational(value.numerator, value.denominator, r=value)
-        elif isinstance(value, float):
+        if isinstance(value, float):
             return encode_float(value)
-        elif isinstance(value, str):
+        if isinstance(value, str):
             return encode_str(0xA0, value)
-        elif isinstance(value, bytes):
-            return encode_blob(0x90, value)
-        elif isinstance(value, dict):
+        if isinstance(value, bytes):
+            return encode_blob(value)
+        if isinstance(value, dict):
             return encode_dict(value)
-        elif isinstance(value, list) or isinstance(value, tuple):
+        if isinstance(value, (list, tuple)):
             return encode_list(value)
-        else:
-            raise TypeError("value must be json-like value")
+        raise TypeError("value must be json-like value")
 
     return blob + encode_value(value)
 
