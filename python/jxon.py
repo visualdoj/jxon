@@ -182,14 +182,13 @@ def encode(value,
         msb, lsb = msb_lsb(numerator)
         resolution = msb - lsb + 1
 
-        # r == numerator * 2**(-23-lsb) * 2**(-exponent+23+lsb)
-        # r == numerator * 2**(-msb)    * 2**(-exponent+msb)
         if (
-
             # denormalized 32-bit float
+            # r == numerator * 2**(-23-lsb) * 2**(-exponent+23+lsb)
             ((resolution <= 23) and (-exponent+23+lsb == -126))
 
             # normalized 32-bit float
+            # r == numerator * 2**(-msb)    * 2**(-exponent+msb)
         or  ((resolution <= 24) and (1-127 <= -exponent+msb <= 254-127))
 
         ):
