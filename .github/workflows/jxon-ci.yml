@@ -45,6 +45,8 @@ jobs:
 
       - run: pip install -U pylint
 
+      - run: pip install -U pytest
+
       - run: make lint
         working-directory: ${{ github.workspace }}/repository/python
 
