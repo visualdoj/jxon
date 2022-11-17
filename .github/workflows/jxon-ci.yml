@@ -26,6 +26,28 @@ jobs:
       - run: make test
         working-directory: ${{ github.workspace }}/repository/python
 
+  Lint-Python:
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        python_version: ['3.x']
+    runs-on: ${{ matrix.os }}
+    needs: Test-Python
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+            path: repository
+
+      - uses: actions/setup-python@v4
+        with:
+            python-version: ${{ matrix.python_version }}
+
+      - run: pip install -U pylint
+
+      - run: make lint
+        working-directory: ${{ github.workspace }}/repository/python
+
   Test-Examples:
     strategy:
       matrix:
