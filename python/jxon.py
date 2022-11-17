@@ -178,18 +178,18 @@ def encode(value,
         msb, lsb = msb_lsb(numerator)
         resolution = msb - lsb + 1
 
-        # r = numerator * 2**(-e)
+        # r == numerator * 2**(-e)
 
-        # r = numerator * 2**(-23-lsb) * 2**(-e+23+lsb)
-        # r = numerator * 2**(-msb)    * 2**(-e+msb)
+        # r == numerator * 2**(-23-lsb) * 2**(-e+23+lsb)
+        # r == numerator * 2**(-msb)    * 2**(-e+msb)
         if (
             ((resolution <= 23) and (-e+23+lsb == -126)) # denormalized 32-bit float
         or  ((resolution <= 24) and (1-127 <= -e+msb <= 254-127)) # normalized 32-bit float
         ):
             return struct.pack("<Bf", 0xF7, r)
 
-        # r = numerator * 2**(-52-lsb) * 2**(-e+52+lsb)
-        # r = numerator * 2**(-msb)    * 2**(-e+msb)
+        # r == numerator * 2**(-52-lsb) * 2**(-e+52+lsb)
+        # r == numerator * 2**(-msb)    * 2**(-e+msb)
         if (
             ((resolution <= 52) and (-e+52+lsb == -1022)) # denormalized 64-bit float
         or  ((resolution <= 53) and (1-1023 <= -e+msb <= 2046-1023)) # normalized 64-bit float
