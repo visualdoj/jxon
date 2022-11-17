@@ -166,19 +166,23 @@ def encode(value,
             lsb += 1
         return msb, lsb
 
-    def encode_rational(numerator, denominator):
+    def encode_rational(numerator, denominator, *, r=None):
+        if r is None:
+            r = fractions.Fraction(numerator, denominator)
+
         if numerator == 0:
             return b'\xF6'
 
         if denominator & (denominator - 1) != 0:
             return encode_bigfloat(numerator, denominator)
 
-        e = math.frexp(denominator)[1] - 1 # log2(denominator)
+        e = math.frexp(denominator)[1] - 1
+
+        # e == log2(denominator)
+        # r == numerator * 2**(-e)
 
         msb, lsb = msb_lsb(numerator)
         resolution = msb - lsb + 1
-
-        # r == numerator * 2**(-e)
 
         # r == numerator * 2**(-23-lsb) * 2**(-e+23+lsb)
         # r == numerator * 2**(-msb)    * 2**(-e+msb)
@@ -207,7 +211,7 @@ def encode(value,
             return struct.pack("<Bf", 0xF7, f)
 
         numerator, denominator = f.as_integer_ratio()
-        return encode_rational(numerator, denominator)
+        return encode_rational(numerator, denominator, r=f)
 
     def encode_str(head, s):
         return encode_int_or_len(head, len(s.encode('utf-8'))) + s.encode('utf-8') + b'\x00'
@@ -257,7 +261,7 @@ def encode(value,
         elif isinstance(value, int):
             return encode_int_or_len(0x80, value)
         elif isinstance(value, numbers.Rational):
-            return encode_rational(value.numerator, value.denominator)
+            return encode_rational(value.numerator, value.denominator, r=value)
         elif isinstance(value, float):
             return encode_float(value)
         elif isinstance(value, str):
