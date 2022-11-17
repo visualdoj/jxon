@@ -166,9 +166,7 @@ def encode(value,
             lsb += 1
         return msb, lsb
 
-    def encode_rational(r):
-        numerator, denominator = r.numerator, r.denominator
-
+    def encode_rational(numerator, denominator):
         if numerator == 0:
             return b'\xF6'
 
@@ -208,8 +206,8 @@ def encode(value,
         if f != f:
             return struct.pack("<Bf", 0xF7, f)
 
-        # TODO check if we can use 32-bit float
-        return struct.pack("<Bd", 0xF8, f)
+        numerator, denominator = f.as_integer_ratio()
+        return encode_rational(numerator, denominator)
 
     def encode_str(head, s):
         return encode_int_or_len(head, len(s.encode('utf-8'))) + s.encode('utf-8') + b'\x00'
@@ -259,7 +257,7 @@ def encode(value,
         elif isinstance(value, int):
             return encode_int_or_len(0x80, value)
         elif isinstance(value, numbers.Rational):
-            return encode_rational(value)
+            return encode_rational(value.numerator, value.denominator)
         elif isinstance(value, float):
             return encode_float(value)
         elif isinstance(value, str):
