@@ -89,11 +89,11 @@ def test_invalid_heads():
     """Checks that decoder failes on forbidden head bytes."""
 
     for byte in range(128):
-        check_invalid_jxon(bytes([byte, b'\xF0']))
+        check_invalid_jxon(bytes([byte, 0xF0]))
     for byte in range(0xC0, 0xEF + 1):
-        check_invalid_jxon(bytes([byte, b'\xF0']))
+        check_invalid_jxon(bytes([byte, 0xF0]))
     for byte in range(0xFE, 0xFF + 1):
-        check_invalid_jxon(bytes([byte, b'\xF0']))
+        check_invalid_jxon(bytes([byte, 0xF0]))
 
 EXAMPLES_PREFIX = '../examples'
 def test_examples():
