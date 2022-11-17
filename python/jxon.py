@@ -109,7 +109,7 @@ def decode(data, allow_JSON=True):
                     index = struct.unpack('<B', stream.read(1))
                     table[index] = s
                     continue
-            raise ValueError('Unknown head in JXON ' + hex(head))
+            raise ValueError('Unknown head in JXON ' + hex(head[0]))
 
     if allow_JSON and not guess_jxon(data):
         try:
