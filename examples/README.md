@@ -56,11 +56,11 @@ This directory contains examples of JXON values.
 |File|Hex|Meaning|
 |:---|:--|:------|
 |[float_0.jxon](float_0.jxon) ([dump](float_0.txt), [json](float_0.json))|F6|`0.0`|
-|[float_1.jxon](float_1.jxon) ([dump](float_1.txt), [json](float_1.json))|F8000000000000F03F|`1.0`|
+|[float_1.jxon](float_1.jxon) ([dump](float_1.txt), [json](float_1.json))|F70000803F|`1.0`|
 |[float_nan.jxon](float_nan.jxon) ([dump](float_nan.txt), [json](float_nan.json))|F70000C07F|NaN|
 |[float_neg_nan.jxon](float_neg_nan.jxon) ([dump](float_neg_nan.txt), [json](float_neg_nan.json))|F70000C0FF|-NaN|
-|[float_inf.jxon](float_inf.jxon) ([dump](float_inf.txt), [json](float_inf.json))|F8000000000000F07F|Infinity|
-|[float_neg_inf.jxon](float_neg_inf.jxon) ([dump](float_neg_inf.txt), [json](float_neg_inf.json))|F8000000000000F0FF|-Infinity|
+|[float_inf.jxon](float_inf.jxon) ([dump](float_inf.txt), [json](float_inf.json))|F70000807F|Infinity|
+|[float_neg_inf.jxon](float_neg_inf.jxon) ([dump](float_neg_inf.txt), [json](float_neg_inf.json))|F7000080FF|-Infinity|
 |[float_nan.jxon](float_nan.jxon) ([dump](float_nan.txt), [json](float_nan.json))|F70000C07F|NaN|
 |[float_half.jxon](float_half.jxon) ([dump](float_half.txt), [json](float_half.json))|F70000003F|1/2|
 |[float_minnorm32.jxon](float_minnorm32.jxon) ([dump](float_minnorm32.txt), [json](float_minnorm32.json))|F700008000|`2^-126` (minimal normalized float)|

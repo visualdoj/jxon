@@ -58,7 +58,7 @@ class Readme:
             self.file.close()
             self.file = None
 
-    def start_chapter(self):
+    def start_chapter(self, name):
         """Starts a new chapter."""
 
         if self.file:
@@ -75,7 +75,7 @@ class Readme:
             jxon_dump = hexdump(jxon, 20)
             protobuf_link = f", [protobuf]({protobuf})" if protobuf else ""
             self.file.write(f"|[{filename}.jxon]({filename}.jxon) ("
-                            f"[dump]({filename}.txt),"
+                            f"[dump]({filename}.txt), "
                             f"[json]({filename}.json){protobuf_link})"
                             f"|{jxon_dump}"
                             f"|{meaning}|\n")
@@ -349,7 +349,6 @@ def generate_examples():
        Requires protobuf sources to be generated.
     """
 
-    generate_examples()
     readme.start()
 
     readme.start_chapter('Simple values')
