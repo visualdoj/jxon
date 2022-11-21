@@ -18,6 +18,10 @@ Draft. Format for `BigInt` is yet to be [chosen](docs/bigint_ideas.md).
 See [examples](examples#jxon-examples) directory. `*.jxon` files are JXON values,
 `*.txt` are their hex dumps and `*.json` are their respective JSON equivalents.
 
+## Implementations
+
+* [Python](python) — reference implementation (still in development)
+
 ## Specification
 
 `JXON` value is a sequence of commands. Each command starts with 1 byte header

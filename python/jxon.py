@@ -22,7 +22,7 @@ def decode(data, allow_JSON=True):
     """Decodes JXON and returns it as a python value.
     """
 
-    table=[]
+    table={}
     stream = io.BytesIO(data)
 
     def guess_jxon(data):
@@ -35,20 +35,20 @@ def decode(data, allow_JSON=True):
     def decode_int(head):
         low = head & 0x0F
         if low == 10:
-            return struct.unpack('<b', stream.read(1))
+            return struct.unpack('<b', stream.read(1))[0]
         if low == 11:
-            return struct.unpack('<h', stream.read(2))
+            return struct.unpack('<h', stream.read(2))[0]
         if low == 12:
-            return struct.unpack('<i', stream.read(4))
+            return struct.unpack('<i', stream.read(4))[0]
         if low == 13:
-            return struct.unpack('<q', stream.read(8))
+            return struct.unpack('<q', stream.read(8))[0]
         if low == 14:
             return decode_bigint()
         return low if low != 15 else -1
 
     def decode_key_from_stream(head):
-        if (head & 0xF0) != 0xB0:
-            return ValueError('key must be string')
+        if (head & 0xF0) != 0xA0:
+            raise ValueError('key must be string')
         i = decode_int(head)
         s = stream.read(i).decode('utf-8')
         stream.read(1) # skip null character
@@ -57,22 +57,31 @@ def decode(data, allow_JSON=True):
     def decode_object_from_stream():
         obj = {}
         while True:
-            head = stream.read(1)
+            head = stream.read(1)[0]
             if head == 0xF5:
                 return obj
             if head < 0x80:
                 key = table[head]
             else:
                 key = decode_key_from_stream(head)
-            value = decode_value_from_stream()
+            head = stream.read(1)[0]
+            value = decode_value_from_stream(head)
             obj[key] = value
 
     def decode_array_from_stream():
-        raise NotImplementedError('TODO array decoder')
-
-    def decode_value_from_stream():
+        array = []
         while True:
             head = stream.read(1)
+            if head == b'':
+                raise ValueError('Unexpected end of stream')
+            head = head[0]
+            if head == 0xF5:
+                return array
+            value = decode_value_from_stream(head)
+            array.append(value)
+
+    def decode_value_from_stream(head):
+        while True:
             if head == 0xF0:
                 return None
             if head == 0xF1:
@@ -88,12 +97,12 @@ def decode(data, allow_JSON=True):
             if head == 0xF6:
                 return 0.0
             if head == 0xF7:
-                return struct.unpack('<f', stream.read(4))
+                return struct.unpack('<f', stream.read(4))[0]
             if head == 0xF8:
-                return struct.unpack('<d', stream.read(8))
+                return struct.unpack('<d', stream.read(8))[0]
             if head == 0xF9:
                 return fractions.Fraction(decode_bigint(), decode_bigint())
-            if 0x80 <= head[0] <= 0xBF:
+            if 0x80 <= head <= 0xBF:
                 i = decode_int(head)
                 if head & 0xF0 == 0x80:
                     return i
@@ -106,10 +115,11 @@ def decode(data, allow_JSON=True):
                 if head & 0xF0 == 0xB0:
                     s = stream.read(i).decode('utf-8')
                     stream.read(1) # skip null character
-                    index = struct.unpack('<B', stream.read(1))
+                    index = struct.unpack('<B', stream.read(1))[0]
                     table[index] = s
+                    head = stream.read(1)[0]
                     continue
-            raise ValueError('Unknown head in JXON ' + hex(head[0]))
+            raise ValueError('Unknown head in JXON ' + hex(head))
 
     if allow_JSON and not guess_jxon(data):
         try:
@@ -117,7 +127,7 @@ def decode(data, allow_JSON=True):
         except Exception as exception:
             raise ValueError('data must be in JXON or JSON format') from exception
 
-    return decode_value_from_stream()
+    return decode_value_from_stream(stream.read(1)[0])
 
 
 def encode(value,
@@ -279,7 +289,7 @@ def encode(value,
             return encode_list(value)
         raise TypeError("value must be json-like value")
 
-    return blob + encode_value(value)
+    return bytes(blob + encode_value(value))
 
 
 #  ---------------------------------------------------------------------------

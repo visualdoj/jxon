@@ -32,6 +32,24 @@ blob = jxon.encode({"a": 1, "b": "str"})
 blob = jxon.encode([{"foo": 1}, {"foo": 2}, {"foo": 3}], keys_table=["foo"])
 ```
 
+## Decoder
+
+```python
+import jxon
+
+# jxon.decode() takes bytes and returns python value
+print(jxon.decode(b'\xAA\x0C' b'Hello world!' b'\x00'))
+
+
+
+# jxon.decode() can parse JSONs as well
+print(jxon.decode(b'{"foo": "bar", "num": 1}'))
+
+# to disable this feature pass allow_JSON=False
+jxon.decode(b'{"foo": "bar", "num": 1}', allow_JSON=False)
+# ... ValueError: Unknown head in JXON 0x7b
+```
+
 ## Command line tool
 
 ```
