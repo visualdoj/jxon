@@ -32,7 +32,7 @@ blob = jxon.encode({"a": 1, "b": "str"})
 blob = jxon.encode([{"foo": 1}, {"foo": 2}, {"foo": 3}], keys_table=["foo"])
 ```
 
-## Decoder
+### Decoder
 
 ```python
 import jxon
