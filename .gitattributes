@@ -1,0 +1,4 @@
+* text=auto
+
+# JXON is binary format
+*.jxon binary
